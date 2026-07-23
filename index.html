@@ -154,9 +154,13 @@
   .hero-meta div{font-size:11px; color:var(--muted-dim); letter-spacing:0.08em; text-transform:uppercase;}
   .hero-meta strong{display:block; font-family:'Space Grotesk',sans-serif; font-size:20px; color:var(--text); font-weight:600; margin-top:4px;}
 
-  .chip-stage{
-    perspective:1100px; height:420px; display:flex; align-items:center; justify-content:center;
-  }
+.chip-stage{
+  perspective:1100px; height:420px; display:flex; align-items:center; justify-content:center;
+  cursor: grab;
+}
+.chip-stage:active{
+  cursor: grabbing;
+}
   .chip{
     width:230px; height:230px; position:relative; transform-style:preserve-3d;
     transform: rotateX(-18deg) rotateY(28deg);
