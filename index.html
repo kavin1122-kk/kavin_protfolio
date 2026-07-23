@@ -165,7 +165,6 @@
     width:230px; height:230px; position:relative; transform-style:preserve-3d;
     transform: rotateX(-18deg) rotateY(28deg);
     transition:transform .12s ease-out;
-    animation: chip-float 6s ease-in-out infinite;
   }
   @keyframes chip-float{
   from{ transform: rotateX(-18deg) rotateY(0deg); }
@@ -609,15 +608,26 @@
   const chip = document.getElementById('chip3d');
   let isDragging = false, startX = 0, startY = 0;
   let rotY = 28, rotX = -18;
+  let autoRotate = true;
 
   function setChipTransform(){
     chip.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
   }
 
+  function tick(){
+    if(autoRotate && !isDragging){
+      rotY += 0.4;
+      if(rotY >= 360) rotY -= 360;
+      setChipTransform();
+    }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
   function startDrag(x, y){
     isDragging = true;
+    autoRotate = false;
     startX = x; startY = y;
-    chip.style.animation = 'none'; // stop auto-float once user takes control
     stage.style.cursor = 'grabbing';
   }
   function moveDrag(x, y){
@@ -630,8 +640,10 @@
     startX = x; startY = y;
   }
   function endDrag(){
+    if(!isDragging) return;
     isDragging = false;
     stage.style.cursor = 'grab';
+    autoRotate = true;
   }
 
   stage.addEventListener('mousedown', (e) => startDrag(e.clientX, e.clientY));
