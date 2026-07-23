@@ -607,24 +607,40 @@
 <script>
   const stage = document.getElementById('chipStage');
   const chip = document.getElementById('chip3d');
-  let rafPending = false, lastX = 0, lastY = 0;
+  let isDragging = false, startX = 0, startY = 0;
+  let rotY = 28, rotX = -18;
 
-  function applyTilt(){
-    chip.style.transform = `rotateX(${lastY}deg) rotateY(${lastX}deg)`;
-    rafPending = false;
+  function setChipTransform(){
+    chip.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
   }
 
-  stage.addEventListener('mousemove', (e) => {
-    const rect = stage.getBoundingClientRect();
-    const px = (e.clientX - rect.left) / rect.width - 0.5;
-    const py = (e.clientY - rect.top) / rect.height - 0.5;
-    lastX = 28 + px * 60;
-    lastY = -18 - py * 40;
-    if(!rafPending){ rafPending = true; requestAnimationFrame(applyTilt); }
-  });
-  stage.addEventListener('mouseleave', () => {
-    chip.style.transform = '';
-  });
+  function startDrag(x, y){
+    isDragging = true;
+    startX = x; startY = y;
+    chip.style.animation = 'none'; // stop auto-float once user takes control
+    stage.style.cursor = 'grabbing';
+  }
+  function moveDrag(x, y){
+    if(!isDragging) return;
+    const deltaX = x - startX;
+    const deltaY = y - startY;
+    rotY += deltaX * 0.4;
+    rotX = Math.max(-80, Math.min(80, rotX - deltaY * 0.4));
+    setChipTransform();
+    startX = x; startY = y;
+  }
+  function endDrag(){
+    isDragging = false;
+    stage.style.cursor = 'grab';
+  }
+
+  stage.addEventListener('mousedown', (e) => startDrag(e.clientX, e.clientY));
+  document.addEventListener('mousemove', (e) => moveDrag(e.clientX, e.clientY));
+  document.addEventListener('mouseup', endDrag);
+
+  stage.addEventListener('touchstart', (e) => startDrag(e.touches[0].clientX, e.touches[0].clientY), {passive:true});
+  document.addEventListener('touchmove', (e) => moveDrag(e.touches[0].clientX, e.touches[0].clientY), {passive:true});
+  document.addEventListener('touchend', endDrag);
 
   const pinLayer = document.createElement('div');
   pinLayer.className = 'pins';
